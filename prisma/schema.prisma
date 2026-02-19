@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+}
+
+enum TicketStatus {
+  SUBMITTED
+  IN_REVIEW
+  WAITING_STUDENT
+  RESOLVED
+  REJECTED
+}
+
+enum IssueType {
+  ATTENDANCE
+  LETTERS
+  ID
+  FINANCE
+  TIMETABLE
+  COMPLAINTS
+}
+
+enum TicketEventType {
+  CREATED
+  STATUS_CHANGED
+  ADMIN_REPLY
+  STUDENT_NOTE
+  INTERNAL_NOTE
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      UserRole @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assignedTickets Ticket[] @relation("AssignedTickets")
+}
+
+model Ticket {
+  id                  String       @id @default(uuid())
+  publicTicketId      String       @unique
+  issueType           IssueType
+  department          String
+  studentName         String?
+  studentId           String?
+  studentEmailOrPhone String?
+  title               String
+  description         String
+  status              TicketStatus @default(SUBMITTED)
+  viewToken           String       @unique
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  assignedToId String?
+  assignedTo   User?        @relation("AssignedTickets", fields: [assignedToId], references: [id])
+
+  attachments Attachment[]
+  events      TicketEvent[]
+}
+
+model Attachment {
+  id        String   @id @default(uuid())
+  ticketId  String
+  fileName  String
+  fileUrl   String
+  fileMime  String
+  fileSize  Int
+  createdAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+}
+
+model TicketEvent {
+  id        String          @id @default(uuid())
+  ticketId  String
+  type      TicketEventType
+  message   String
+  fromRole  UserRole?
+  createdAt DateTime        @default(now())
+  metaJson  String?
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+}
