@@ -50,6 +50,7 @@ This document is the A→Z checklist to take this project to production on Verce
 - [ ] `UPSTASH_REDIS_REST_TOKEN`
 
 **Email**
+- [ ] `EMAIL_ENABLED` → `false` if you don’t have SMTP yet
 - [ ] `SMTP_HOST`
 - [ ] `SMTP_PORT`
 - [ ] `SMTP_USER`
@@ -60,7 +61,7 @@ This document is the A→Z checklist to take this project to production on Verce
 
 Use your terminal with production env vars loaded (or a CI job):
 
-- [ ] `npx prisma migrate deploy`
+- [ ] `npx prisma migrate deploy` (use your **unpooled** connection string for migrations)
 - [ ] `npm run seed`
 
 ### 5) Smoke test production

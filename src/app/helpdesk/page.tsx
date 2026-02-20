@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { Suspense, useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,7 +16,7 @@ type UploadMeta = {
   fileSize: number
 }
 
-export default function HelpDeskPage() {
+function HelpDeskForm() {
   const searchParams = useSearchParams()
   const deptFromQuery = searchParams.get("dept") ?? ""
   const [issueType, setIssueType] = useState<string>(ISSUE_TYPES[0])
@@ -300,5 +300,17 @@ export default function HelpDeskPage() {
         </p>
       </div>
     </main>
+  )
+}
+
+export default function HelpDeskPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen page-gradient px-4 py-12">
+        <div className="mx-auto max-w-3xl text-center text-muted-foreground">Loading...</div>
+      </main>
+    }>
+      <HelpDeskForm />
+    </Suspense>
   )
 }

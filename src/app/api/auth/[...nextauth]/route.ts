@@ -1,9 +1,8 @@
-import NextAuth from "next-auth"
+import NextAuth from "next-auth/next"
 import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { checkRateLimit } from "@/lib/rate-limit"
-import { getClientIp } from "@/lib/security"
 
 const handler = NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
@@ -16,7 +15,11 @@ const handler = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials, req) {
-        const ip = getClientIp(req)
+        const forwarded = req?.headers?.["x-forwarded-for"]
+        const ip =
+          typeof forwarded === "string"
+            ? forwarded.split(",")[0]?.trim() || "unknown"
+            : "unknown"
         const rate = await checkRateLimit(`auth:login:${ip}`)
         if (!rate.ok) return null
         if (!credentials?.email || !credentials.password) return null
@@ -39,13 +42,13 @@ const handler = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as { role: string }).role
+        token.role = (user as unknown as { role: string }).role
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.role = token.role as string
+        (session.user as Record<string, unknown>).role = token.role as string
       }
       return session
     },

@@ -5,10 +5,14 @@ const port = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : undefined
 const user = process.env.SMTP_USER
 const pass = process.env.SMTP_PASS
 const from = process.env.SMTP_FROM || "no-reply@university.edu"
+const emailEnabled = process.env.EMAIL_ENABLED !== "false"
 
 let transporter: nodemailer.Transporter | null = null
 
 export function getTransporter() {
+  if (!emailEnabled) {
+    return null
+  }
   if (!host || !port || !user || !pass) {
     throw new Error("Missing SMTP configuration")
   }
@@ -24,7 +28,9 @@ export function getTransporter() {
 }
 
 export async function sendEmail(to: string, subject: string, html: string) {
+  if (!emailEnabled) return
   const client = getTransporter()
+  if (!client) return
   await client.sendMail({
     from,
     to,

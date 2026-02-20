@@ -37,6 +37,7 @@ For deployment on Vercel, follow the end-to-end checklist in PRODUCTION.md.
 - `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
 - `SEED_SAMPLE_TICKET` (true|false)
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`
+- `EMAIL_ENABLED` (true|false)
 
 ## Security notes
 

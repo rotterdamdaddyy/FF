@@ -6,13 +6,26 @@ import { applySecurityHeaders } from "@/middleware/headers"
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next()
   applySecurityHeaders(request, response)
-  if (request.nextUrl.pathname.startsWith("/admin")) {
+
+  const pathname = request.nextUrl.pathname
+
+  // Skip auth check for login page, logout page, and auth API routes
+  if (
+    pathname === "/admin/login" ||
+    pathname === "/admin/logout" ||
+    pathname.startsWith("/api/auth")
+  ) {
+    return response
+  }
+
+  if (pathname.startsWith("/admin")) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET })
     if (!token || token.role !== "ADMIN") {
       const loginUrl = new URL("/admin/login", request.url)
       return NextResponse.redirect(loginUrl)
     }
   }
+
   return response
 }
 
